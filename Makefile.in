@@ -1,0 +1,51 @@
+SHELL = @SHELL@
+srcdir = @srcdir@
+VPATH = @srcdir@
+CC = @CC@
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
+PREFIX = @prefix@
+.SUFFIXES:
+.SUFFIXES: .c .o
+
+PKG_CONFIG = @PKG_CONFIG@
+
+EXEC = jailmaster
+
+############ Things to change for different programs
+
+PROG = jailrequest
+
+SRCS = jailrequest.c
+
+OBJECTS = ${patsubst %.c, %.o, ${SRCS}} 
+
+############ Things to keep the same
+
+%.o:%.c
+	${CC} $(CFLAGS) -c -o $@ $<
+
+${PROG}: ${OBJECTS}
+	${CC} -o ${PROG} ${OBJECTS} ${LDFLAGS}
+
+install: ${PROG}
+	install -D ${PROG} ${DESTDIR}${PREFIX}/bin/${PROG}
+	
+
+clean:
+	rm -f *.o ${PROG}
+
+mrproper: clean
+	rm -f config.log Makefile config.status
+
+depend:
+	makedepend -- ${CFLAGS} -- ${SRCS}
+
+Makefile: Makefile.in config.status
+	./config.status
+
+config.status: configure
+	$(srcdir)/configure 
+
+configure: configure.in
+	cd $(srcdir) && autoconf
